@@ -10,7 +10,7 @@ spec:
       type: string
     - name: branch
       type: string
-      default: main  # Updated from master to main
+      default: "main" 
     - name: build-image
       type: string
   tasks:
@@ -55,14 +55,20 @@ spec:
 
     - name: build
       taskRef:
-        name: buildah
+        name: kaniko
       runAfter:
         - tests
       params:
         - name: IMAGE
           value: $(params.build-image)
-        - name: PRIVILEGED_ENGINE # ADD THIS PARAMETER
-          value: "false"
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+        - name: EXTRA_ARGS
+          value:
+            - --skip-tls-verify
+            - --cache=false
       workspaces:
         - name: source
           workspace: output
@@ -74,7 +80,6 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            # Check if deployment exists. If not, create it. If yes, restart it.
             if ! oc get deployment ny-restaurants > /dev/null 2>&1; then
               echo "Creating new deployment..."
               oc create deployment ny-restaurants --image=$(params.build-image)
@@ -82,6 +87,7 @@ spec:
               oc expose service ny-restaurants
             else
               echo "Updating existing deployment..."
+              oc set image deployment/ny-restaurants *=$(params.build-image)
               oc rollout restart deployment/ny-restaurants
             fi
             oc get route ny-restaurants
