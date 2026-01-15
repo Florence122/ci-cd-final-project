@@ -10,7 +10,7 @@ spec:
       type: string
     - name: branch
       type: string
-      default: "main"  # Updated from master to main
+      default: main  # Updated from master to main
     - name: build-image
       type: string
   tasks:
@@ -61,6 +61,8 @@ spec:
       params:
         - name: IMAGE
           value: $(params.build-image)
+        - name: PRIVILEGED_ENGINE # ADD THIS PARAMETER
+          value: "false"
       workspaces:
         - name: source
           workspace: output
