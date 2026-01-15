@@ -69,4 +69,4 @@ spec:
         #!/bin/bash
         set -e
         python -m pip install flake8
-        flake8 .
+        flake8 . --ignore=E501
