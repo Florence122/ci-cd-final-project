@@ -55,20 +55,19 @@ spec:
 
     - name: build
       taskRef:
-        name: kaniko
+        # Switched to Buildah for better OpenShift Registry integration
+        name: buildah
       runAfter:
         - tests
       params:
         - name: IMAGE
           value: $(params.build-image)
-        - name: DOCKERFILE
-          value: ./Dockerfile
-        - name: CONTEXT
-          value: .
-        - name: EXTRA_ARGS
-          value:
-            - --skip-tls-verify
-            - --cache=false
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: SKIP_PUSH
+          value: "false"
+        - name: FORMAT
+          value: docker
       workspaces:
         - name: source
           workspace: output

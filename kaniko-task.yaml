@@ -21,9 +21,6 @@ spec:
   workspaces:
     - name: source
       description: Holds the context and Dockerfile
-    - name: dockerconfig
-      description: Docker config for authentication
-      optional: true
   results:
     - name: IMAGE_DIGEST
       description: Digest of the image just built.
@@ -39,18 +36,5 @@ spec:
         - --context=$(workspaces.source.path)/$(params.CONTEXT)
         - --destination=$(params.IMAGE)
         - --digest-file=$(results.IMAGE_DIGEST.path)
-      env:
-        - name: DOCKER_CONFIG
-          value: /kaniko/.docker
-      volumeMounts:
-        - name: docker-config
-          mountPath: /kaniko/.docker/
       securityContext:
         runAsUser: 0
-  volumes:
-    - name: docker-config
-      secret:
-        secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: config.json
