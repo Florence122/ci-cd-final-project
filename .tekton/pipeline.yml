@@ -10,7 +10,7 @@ spec:
       type: string
     - name: branch
       type: string
-      default: "master"
+      default: "main"  # Updated from master to main
     - name: build-image
       type: string
   tasks:
@@ -72,7 +72,16 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            oc rollout restart deployment/ny-restaurants
+            # Check if deployment exists. If not, create it. If yes, restart it.
+            if ! oc get deployment ny-restaurants > /dev/null 2>&1; then
+              echo "Creating new deployment..."
+              oc create deployment ny-restaurants --image=$(params.build-image)
+              oc expose deployment ny-restaurants --port=8080
+              oc expose service ny-restaurants
+            else
+              echo "Updating existing deployment..."
+              oc rollout restart deployment/ny-restaurants
+            fi
             oc get route ny-restaurants
       workspaces:
         - name: manifest-dir
